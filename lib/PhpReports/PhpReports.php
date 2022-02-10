@@ -45,13 +45,10 @@ class PhpReports {
 		$template_dirs = array('templates/default','templates');
 		if(file_exists('templates/local')) array_unshift($template_dirs, 'templates/local');
 
-		$loader = new Twig_Loader_Chain(array(
-			new Twig_Loader_Filesystem($template_dirs),
-			new Twig_Loader_String()
-		));
-		self::$twig = new Twig_Environment($loader);
-		self::$twig->addFunction(new Twig_SimpleFunction('dbdate', 'PhpReports::dbdate'));
-		self::$twig->addFunction(new Twig_SimpleFunction('sqlin', 'PhpReports::generateSqlIN'));
+        $loader = new \Twig\Loader\FilesystemLoader($template_dirs);
+        self::$twig = new \Twig\Environment($loader);
+        self::$twig->addFunction(new \Twig\TwigFunction('dbdate', 'PhpReports::dbdate'));
+		self::$twig->addFunction(new \Twig\TwigFunction('sqlin', 'PhpReports::generateSqlIN'));
 
 		if(isset($_COOKIE['reports-theme']) && $_COOKIE['reports-theme']) {
 			$theme = $_COOKIE['reports-theme'];
@@ -62,10 +59,9 @@ class PhpReports {
 		self::$twig->addGlobal('theme', $theme);
 		self::$twig->addGlobal('path', $path);
 
-		self::$twig->addFilter('var_dump', new Twig_Filter_Function('var_dump'));
-
-		self::$twig_string = new Twig_Environment(new Twig_Loader_String(), array('autoescape'=>false));
-		self::$twig_string->addFunction(new Twig_SimpleFunction('sqlin', 'PhpReports::generateSqlIN'));
+		self::$twig->addFilter(new \Twig\TwigFilter('var_dump'));
+        self::$twig_string = new \Twig\Environment(new Twig\Loader\FilesystemLoader(), array('autoescape'=>false));;
+		self::$twig_string->addFunction(new \Twig\TwigFunction('sqlin', 'PhpReports::generateSqlIN'));
 
 		FileSystemCache::$cacheDir = self::$config['cacheDir'];
 
@@ -458,17 +454,25 @@ class PhpReports {
 			}
 		}
 
-		usort($return,function(&$a,&$b) {
-			if($a['is_dir'] && !$b['is_dir']) return 1;
-			elseif($b['is_dir'] && !$a['is_dir']) return -1;
-
-			if(empty($a['Title']) && empty($b['Title'])) return strcmp($a['Name'],$b['Name']);
-			elseif(empty($a['Title'])) return 1;
-			elseif(empty($b['Title'])) return -1;
-
-			return strcmp($a['Title'], $b['Title']);
+		usort($return, function($a, $b) {
+			$result = 0;
+            if ($a['is_dir'] && !$b['is_dir']) {
+                $result = 1;
+            } elseif ($b['is_dir'] && !$a['is_dir'])  {
+                $result = -1;
+			}
+            if (empty($a['Title']) && empty($b['Title'])) {
+                $result = strcmp($a['Name'], $b['Name']);
+            } elseif (empty($a['Title'])) {
+                $result = 1;
+            } elseif(empty($b['Title'])) {
+                $result = -1;
+            }
+            if ($result === 0) {
+                $result = strcmp($a['Name'], $b['Name']);
+            }
+			return $result;
 		});
-
 		return $return;
 	}
 

@@ -11,9 +11,9 @@
         }
     ],
     "require": {
-        "php": ">=5.3",
+        "php": ">=8.1",
         "ext-pdo": "*",
-        "twig/twig": "1.*",
+        "twig/twig": "3.*",
         "swiftmailer/swiftmailer": "5.*",
         "mikecao/flight": "dev-master",
         "jdorn/sql-formatter": "dev-master",
