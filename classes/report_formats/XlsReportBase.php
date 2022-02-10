@@ -16,7 +16,7 @@ abstract class XlsReportBase extends ReportFormatBase {
 	
 	public static function getExcelRepresantation(&$report) {
 		// Create new PHPExcel object
-		$objPHPExcel = new PHPExcel();
+		$objPHPExcel = new PhpOffice\PhpSpreadsheet\Spreadsheet();
 
 		// Set document properties
 		$objPHPExcel->getProperties()->setCreator("PHP-Reports")

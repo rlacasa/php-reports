@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class XlsxReportFormat extends XlsReportBase {
 	public static function display(&$report, &$request) {
 		// First let set up some headers
@@ -14,7 +17,7 @@ class XlsxReportFormat extends XlsReportBase {
 
 		$objPHPExcel = parent::getExcelRepresantation($report);
 
-		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+		$objWriter = IOFactory::createWriter($objPHPExcel, 'Xlsx');
 		
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header('Content-Disposition: attachment;filename="'.$file_name.'.xlsx"');

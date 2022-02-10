@@ -5,3 +5,7 @@ cache/
 classes/local/*.php
 templates/local
 vendor/
+Docker
+Docker-compose.yml
+composer.lock
+.devcontainer/

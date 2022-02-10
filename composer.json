@@ -18,11 +18,11 @@
         "mikecao/flight": "dev-master",
         "jdorn/sql-formatter": "dev-master",
         "jdorn/file-system-cache": "dev-master",
-        "phpoffice/phpexcel": "dev-develop",
+        "phpoffice/phpspreadsheet": "^1.21",
         "adodb/adodb-php": "dev-master",
         "lespoilus/spyc": "dev-master",
         "google/apiclient": "1.0.*@beta",
-        "alcaeus/mongo-php-adapter": "^1.1@dev"
+        "alcaeus/mongo-php-adapter": "^1.2.2"
     },
     "autoload": {
         "files": [

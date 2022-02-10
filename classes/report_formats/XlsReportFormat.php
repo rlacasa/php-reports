@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class XlsReportFormat extends XlsReportBase {
 	public static function display(&$report, &$request) {
 		// First let set up some headers
@@ -10,11 +13,11 @@ class XlsReportFormat extends XlsReportBase {
 		//run the report
 		$report->run();
 
-		if(!$report->options['DataSets']) return;
+		if (!$report->options['DataSets']) return;
 
 		$objPHPExcel = parent::getExcelRepresantation($report);
 
-		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+		$objWriter = IOFactory::createWriter($objPHPExcel, 'Xls');
 		
 		header('Content-Type: application/vnd.ms-excel');
 		header('Content-Disposition: attachment;filename="'.$file_name.'.xls"');
