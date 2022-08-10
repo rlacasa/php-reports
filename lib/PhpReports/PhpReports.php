@@ -1,7 +1,13 @@
 <?php
+
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
+
 class PhpReports {
 	public static $config;
 	public static $request;
+    public static $loader;
 	public static $twig;
 	public static $twig_string;
 
@@ -42,14 +48,16 @@ class PhpReports {
 		//the load order for templates is: "templates/local", "templates/default", "templates"
 		//this means loading the template "html/report.twig" will load the local first and then the default
 		//if you want to extend a default template from within a local template, you can do {% extends "default/html/report.twig" %} and it will fall back to the last loader
-		$template_dirs = array('templates/default','templates');
-		if(file_exists('templates/local')) array_unshift($template_dirs, 'templates/local');
-
-        $loader = new \Twig\Loader\FilesystemLoader($template_dirs);
-        self::$twig = new \Twig\Environment($loader);
-        self::$twig->addFunction(new \Twig\TwigFunction('dbdate', 'PhpReports::dbdate'));
-		self::$twig->addFunction(new \Twig\TwigFunction('sqlin', 'PhpReports::generateSqlIN'));
-
+		$template_dirs = array('templates/default', 'templates');
+		if(file_exists('templates/local')) {
+            array_unshift($template_dirs, 'templates/local');
+        }
+        self::$loader = new \Twig\Loader\ChainLoader([
+            new \Twig\Loader\FilesystemLoader($template_dirs)
+        ]);
+        self::$twig = new Environment(self::$loader);
+        self::$twig->addFunction(new TwigFunction('dbdate', 'PhpReports::dbdate'));
+		self::$twig->addFunction(new TwigFunction('sqlin', 'PhpReports::generateSqlIN'));
 		if(isset($_COOKIE['reports-theme']) && $_COOKIE['reports-theme']) {
 			$theme = $_COOKIE['reports-theme'];
 		}
@@ -159,15 +167,20 @@ class PhpReports {
 			'recent_reports'=>self::getRecentReports(),
 			'session'=>$_SESSION
 		);
-		$macros = array_merge($default,$macros);
-
+		$macros = array_merge($default, $macros);
 		//if a template path like 'html/report' is given, add the twig file extension
-		if(preg_match('/^[a-zA-Z_\-0-9\/]+$/',$template)) $template .= '.twig';
-		return self::$twig->render($template,$macros);
+		if (preg_match('/^[a-zA-Z_\-0-9\/]+$/',$template)) {
+            $template .= '.twig';
+        }
+        if (str_starts_with($template, 'SELECT ')) {
+            $template = self::$twig->createTemplate($template);
+            self::$loader->addLoader(new \Twig\Loader\ArrayLoader([$template]));
+        }
+		return self::$twig->render($template, $macros);
 	}
 
 	public static function renderString($template, $macros) {
-			return self::$twig_string->render($template,$macros);
+			return self::$twig_string->render($template, $macros);
 	}
 
 	public static function displayReport($report,$type) {
@@ -400,11 +413,11 @@ class PhpReports {
 	}
 
 	protected static function getReports($dir, &$errors = null) {
-		$base = self::$config['reportDir'].'/';
+		$base = self::$config['reportDir'] .'/';
 
-		$reports = glob($dir.'*',GLOB_NOSORT);
+		$reports = glob($dir . '*',GLOB_NOSORT);
 		$return = array();
-		foreach($reports as $key=>$report) {
+		foreach($reports as $key => $report) {
 			$title = $description = false;
 
 			if(is_dir($report)) {
@@ -441,8 +454,14 @@ class PhpReports {
 				$name = substr($report,strlen($base));
 
 				try {
-					$data = self::getReportHeaders($name,$base);
-					$return[] = $data;
+					$data = self::getReportHeaders($name, $base);
+                    $usuarios = '';
+                    if (isset($data['Variables']['usuarios']['default'])) {
+                        $usuarios = $data['Variables']['usuarios']['default'];
+                    }
+                    if (preg_match('/\b' . $_SESSION['login']['username'] . '\b/', $usuarios)) {
+                        $return[] = $data;
+                    }
 				}
 				catch(Exception $e) {
 					if(!$errors) $errors = array();

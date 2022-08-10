@@ -157,7 +157,7 @@ class PdoReportType extends ReportTypeBase {
 		$macros['environment'] = PhpReports::$config['environments'][$report->options['Environment']];
 
 		//expand macros in query
-		$sql = PhpReports::render($report->raw_query,$macros);
+		$sql = PhpReports::render($report->raw_query, $macros);
 
 		$report->options['Query'] = $sql;
 

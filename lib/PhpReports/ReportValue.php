@@ -81,7 +81,7 @@ class ReportValue {
 				return $return;
 			}
 			else {
-				return htmlentities($return);
+				return !is_null($return) ? htmlentities($return) : '';
 			}
 		}
 		else {
