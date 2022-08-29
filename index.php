@@ -10,7 +10,7 @@ session_start();
 ini_set('max_execution_time', 300);
 
 //sets up autoloading of composer dependencies
-include 'vendor/autoload.php';
+include dirname(__FILE__) . '/vendor/autoload.php';
 
 //sets up autoload (looks in classes/local/, classes/, and lib/ in that order)
 require 'lib/PhpReports/PhpReports.php';
